@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <h:head>
+        <title>Facelet Title</title>
+    </h:head>
+    <h:body>
+        <h:form id="form">
+        <p:growl id="message" showDetail="true" />
+        
+        <p:panel header="Mantenimiento de Autos">
+            <p:panelGrid columns="2">
+                <p:outputLabel value="Marca"/>
+                <p:selectOneMenu id="marca"
+                                 value="#{cMantenimientoAuto.filtrodMarca}" style="width:220px;"
+                                 valueChangeListener="#{cMantenimientoAuto.obtenerModelo}" >
+                    <!-- se coloca el valor de "0" en itemValue para poder hacer la búsqueda por filtros -->
+                    <f:selectItem itemLabel="(Seleccionar)" itemValue="0" />
+                    <f:selectItems value="#{cMantenimientoAuto.listaMarcas}" var="item"
+                                   itemValue="#{item.siCodMarca}"
+                                   itemLabel="#{item.vdescripcion}" />
+                    <p:ajax event="change" update="modelo" />
+                </p:selectOneMenu>
+                
+                <p:outputLabel value="Modelo"/>
+                <p:selectOneMenu id="modelo"
+                                 value="#{cMantenimientoAuto.filtrodModelo}" style="width:220px;">
+                    <!-- se coloca el valor de "0" en itemValue para poder hacer la búsqueda por filtros -->
+                    <f:selectItem itemLabel="(Seleccionar)" itemValue="0" />
+                    <f:selectItems value="#{cMantenimientoAuto.listaModelos}" var="item"
+                                   itemValue="#{item.siCodModelo}"
+                                   itemLabel="#{item.vdescripcion}" />
+                    <p:ajax event="change" update="modelo" />
+                </p:selectOneMenu>
+                
+                <p:outputLabel value="Propietario:"/>
+                <p:inputText value="#{cMantenimientoAuto.filtroPropietario}"/>
+                
+                <p:commandButton value="Buscar" icon="ui-icon-search" action="#{cMantenimientoAuto.buscar}" update="tLista" />
+            </p:panelGrid>
+        </p:panel>
+        <br/>
+        <p:outputPanel>
+            <p:dataTable id="tLista" value="#{cMantenimientoAuto.listaAutos}" var="auto" 
+                         selection="#{cMantenimientoAuto.selectedAuto}" rowKey="#{auto.cplaca}"
+                         selectionMode="single"
+                         rows="10"
+                         paginator="true"
+                         paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="5,10,15,20">               
+                
+                <p:column headerText="Placa">
+                    <h:outputText value="#{auto.cplaca}" />
+                </p:column>
+                <p:column headerText="Marca">
+                    <h:outputText value="#{auto.vdescMarca}" />
+                </p:column>
+                <p:column headerText="Modelo">
+                    <h:outputText value="#{auto.vdescModelo}" />
+                </p:column>
+                <p:column headerText="Propietario">
+                    <h:outputText value="#{auto.vpropietario}" />
+                </p:column>
+                <p:column headerText="Kilometraje">
+                    <h:outputText value="#{auto.nkilometraje}" />
+                </p:column>
+                
+                <p:column headerText="Editar">
+                    <center>
+                        <p:commandButton update=":form:autoDetail" oncomplete="PF('autoDialog').show()" icon="ui-icon-pencil" 
+                                         process="@this"> <!-- con process="@this" aseguramos que se procesen los datos de la grilla  -->
+                            <f:setPropertyActionListener value="#{auto}" target="#{cMantenimientoAuto.selectedAuto}" />
+                        </p:commandButton>
+                    </center>
+                </p:column>
+                <p:column headerText="Eliminar">
+                    <center>
+                        <p:commandButton icon="ui-icon-close" actionListener="#{cMantenimientoAuto.eliminar}" update="tLista, :form:message">
+                            <f:setPropertyActionListener value="#{auto}" target="#{cMantenimientoAuto.selectedAuto}" />
+                            <p:confirm header="Confirmación de eliminación" message="Está seguro de eliminar este dato?" 
+                                       icon="ui-icon-alert" />
+                        </p:commandButton>
+                    </center>
+                </p:column>
+            </p:dataTable>
+        </p:outputPanel>
+        
+        <p:dialog header="Edición de Auto" widgetVar="autoDialog" modal="true" showEffect="fade" hideEffect="fade" resizable="false">
+            <p:outputPanel id="autoDetail" style="text-align:center;">
+                <p:panelGrid  columns="2" rendered="#{not empty cMantenimientoAuto.selectedAuto}">
+                    <h:outputText value="Placa:" />
+                    <h:outputText value="#{cMantenimientoAuto.selectedAuto.cplaca}" />
+
+                    <h:outputText value="Marca" />
+                    <h:outputText value="#{cMantenimientoAuto.selectedAuto.vdescMarca}" />
+
+                    <h:outputText value="Modelo:" />
+                    <h:outputText value="#{cMantenimientoAuto.selectedAuto.vdescModelo}" />
+
+                    <h:outputText value="Propietario:" />
+                    <h:inputText value="#{cMantenimientoAuto.selectedAuto.vpropietario}" />
+                    
+                    <p:commandButton value="Grabar" icon="ui-icon-search" 
+                                     action="#{cMantenimientoAuto.actualizar}" 
+                                     oncomplete="PF('autoDialog').hide()" 
+                                     update="tLista, :form:message"
+                                     process=":form:autoDetail" /> <!-- procesamos todo el formulario -->
+                    
+                </p:panelGrid>
+            </p:outputPanel>
+        </p:dialog>
+        
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+            <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+        </p:confirmDialog>
+        </h:form>
+    </h:body>
+</html>
+

@@ -92,24 +92,6 @@ public class CMantenimientoAuto implements Serializable{
         }
         return null;
     }
-
-    public String actualizar(){
-        try {
-            // registramos un auto
-            IAutoService iAutoService = new AutoServiceImpl();
-            iAutoService.actualizar(selectedAuto.getCplaca(), selectedAuto.getVpropietario());
-            listar();
-            // mostramos un mensaje adecuado
-            FacesContext context = FacesContext.getCurrentInstance();
-                context.addMessage(null, 
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, 
-                                        "Registro de Autos", 
-                                        "Los datos del auto fueron actualizados correctamente"));
-        } catch (Exception ex) {
-            System.out.println("Error al actualizar un auto !!! -->" + ex.toString());
-        }
-        return null;
-    }
     
     public String eliminar(){
         try {
